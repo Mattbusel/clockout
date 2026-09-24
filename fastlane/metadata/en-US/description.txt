@@ -1,0 +1,33 @@
+Clockout is a tip and shift tracker for servers, bartenders, baristas, delivery drivers, stylists and anyone paid hourly plus tips.
+
+Punch out, type the night in twenty seconds, go home. Wages plus tips, minus what you tipped out, divided by the hours you actually worked: that is your real hourly rate, and Clockout shows it for every shift, every week and every job.
+
+PUNCH OUT
+• Clock in and out (past midnight is handled) or just type the hours
+• Sales, cash tips, card tips, and a tip-out worked out from your job's rule
+• Live take-home and per-hour as you type
+
+TONIGHT
+• The month against your goal, with a pace line
+• This week, this year, average per shift, tips as a share of sales
+• Tonight's shift printed on receipt paper
+
+SHIFTS
+• Every shift by week, filtered by job or month, swipe to edit or delete
+
+INSIGHTS
+• Average take-home by day of the week
+• Lunch, dinner, double, close, brunch: which one pays an hour
+• Sixteen weeks of tips and wages, and each job side by side
+
+PAYCHECK CHECK
+• Pick the pay period and type what the check says
+• Clockout adds up your logged hours at each wage, plus card tips if they come on the check, and shows the difference
+
+TAX YEAR
+• Cash, card, tip-out and wages for the year, by job and by month
+• Export the year as a CSV for your accountant
+
+Two jobs or five, each with its own wage and tip-out rule. Six currency symbols.
+
+No account, no ads, no tracking. Everything stays on your phone.

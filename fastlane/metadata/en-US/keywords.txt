@@ -1,0 +1,1 @@
+tips,tip tracker,server,bartender,shift,tipout,waitress,hourly,income,barista,delivery,paycheck
