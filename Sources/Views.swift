@@ -89,6 +89,7 @@ struct WeeklyChart: View {
     let bars: [Store.WeekBar]
     let currency: String
     var height: CGFloat = 150
+    var xLabels: [String] { bars.enumerated().filter { ($0.offset % 4) == 0 }.map { $0.element.label } }
     var body: some View {
         Chart {
             ForEach(bars) { b in
@@ -96,7 +97,7 @@ struct WeeklyChart: View {
                 BarMark(x: .value("Week", b.label), y: .value("Tips", b.tips)).foregroundStyle(Neon.amber).cornerRadius(3)
             }
         }
-        .chartXAxis { AxisMarks(values: .automatic(desiredCount: 4)) { _ in AxisValueLabel().font(.ui(9, .bold)).foregroundStyle(Neon.dim) } }
+        .chartXAxis { AxisMarks(values: xLabels) { _ in AxisValueLabel().font(.ui(9, .bold)).foregroundStyle(Neon.dim) } }
         .chartYAxis { AxisMarks(position: .leading, values: .automatic(desiredCount: 3)) { v in
             AxisGridLine().foregroundStyle(Neon.line)
             AxisValueLabel { if let d = v.as(Double.self) { Text(Money.f(d, currency, cents: false)).font(.ui(9, .bold)).foregroundStyle(Neon.dim) } }
@@ -319,7 +320,7 @@ struct PaycheckView: View {
     @Environment(Store.self) private var store
     @State private var from: Date = Calendar.current.date(byAdding: .day, value: -14, to: .now) ?? .now
     @State private var to: Date = .now
-    @State private var check = ""
+    @State private var check: String = ProcessInfo.processInfo.arguments.contains("paycheck") ? "1986.40" : ""
     var body: some View {
         @Bindable var store = store
         let c = store.currency
