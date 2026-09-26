@@ -548,6 +548,7 @@ struct AddShiftView: View {
 
 struct SettingsView: View {
     @Environment(Store.self) private var store
+    @Environment(Pro.self) private var pro
     @Environment(\.dismiss) private var dismiss
     @State private var goal = ""
     var body: some View {
@@ -558,8 +559,12 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     Eyebrow("Jobs")
                     ForEach($store.jobs) { $j in JobEditor(job: $j) }
-                    GhostButton(title: "Add a job", icon: "plus") { store.jobs.append(Job(name: "New job", color: store.jobs.count % Neon.jobColors.count)); store.save() }
+                    GhostButton(title: store.jobs.isEmpty || pro.unlocked ? "Add a job" : "Add another job (Pro)", icon: store.jobs.isEmpty || pro.unlocked ? "plus" : "lock.fill") {
+                        guard store.jobs.isEmpty || pro.unlocked else { pro.ask(.jobs); return }
+                        store.jobs.append(Job(name: "New job", color: store.jobs.count % Neon.jobColors.count)); store.save()
+                    }
                 }
+                ProCard()
                 VStack(alignment: .leading, spacing: 10) {
                     Eyebrow("Monthly goal")
                     MoneyField(label: "Take-home you are aiming for each month", text: $goal, prefix: store.currency)

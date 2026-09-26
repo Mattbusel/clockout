@@ -5,14 +5,20 @@ import Observation
 struct ClockoutApp: App {
     @State private var store: Store
     @State private var router = Router()
+    @State private var pro: Pro
     init() {
         let a = ProcessInfo.processInfo.arguments
-        _store = State(initialValue: Store(demo: a.contains("-shot") || a.contains("-demoAutoplay")))
+        let demo = a.contains("-shot") || a.contains("-demoAutoplay")
+        _store = State(initialValue: Store(demo: demo))
+        // Screenshots and the review recording show Pro; the paywall shots show it locked.
+        let shot = a.firstIndex(of: "-shot").flatMap { $0 + 1 < a.count ? a[$0 + 1] : nil }
+        let lockedShot = shot.map { $0.hasPrefix("paywall") || $0.hasPrefix("locked") } ?? false
+        _pro = State(initialValue: demo ? Pro(forced: !lockedShot) : Pro())
     }
     var body: some Scene {
         WindowGroup {
-            RootView().environment(store).environment(router).preferredColorScheme(.dark).tint(Neon.amber)
-                .onAppear { router.applyShotArgs(store); Autopilot.shared.run(store, router) }
+            RootView().environment(store).environment(router).environment(pro).preferredColorScheme(.dark).tint(Neon.amber)
+                .onAppear { router.applyShotArgs(store, pro); Autopilot.shared.run(store, router) }
         }
     }
 }
@@ -105,7 +111,7 @@ final class Router {
     var shiftMonth: String? = nil
     var shot = ""
 
-    func applyShotArgs(_ s: Store) {
+    func applyShotArgs(_ s: Store, _ pro: Pro) {
         let a = ProcessInfo.processInfo.arguments
         guard let i = a.firstIndex(of: "-shot"), i + 1 < a.count else { return }
         shot = a[i + 1]
@@ -118,6 +124,8 @@ final class Router {
         case "insights": tab = .insights
         case "paycheck": tab = .money; moneyPage = 0
         case "tax": tab = .money; moneyPage = 1
+        case "paywall": tab = .insights; pro.ask(.insights)
+        case "locked": tab = .money
         default: break
         }
     }
@@ -126,22 +134,34 @@ final class Router {
 struct RootView: View {
     @Environment(Store.self) private var store
     @Environment(Router.self) private var router
+    @Environment(Pro.self) private var pro
     var body: some View {
         @Bindable var router = router
+        @Bindable var pro = pro
         ZStack(alignment: .bottom) {
             DinerBackground()
             Group {
                 switch router.tab {
                 case .home: HomeView()
                 case .shifts: ShiftsView()
-                case .insights: InsightsView()
-                case .money: MoneyView()
+                case .insights:
+                    if pro.unlocked { InsightsView() } else {
+                        LockedPage(reason: .insights, title: "Which nights pay?", pitch: "Your best weekday, your best shift type, real hourly by job and sixteen weeks of tips against wages, drawn from the shifts you log.") { InsightsView() }
+                    }
+                case .money:
+                    if pro.unlocked { MoneyView() } else {
+                        LockedPage(reason: .money, title: "Is the check right?", pitch: "Check a paycheck against your logged hours, see the whole tax year, and export it as a CSV for whoever does your taxes.") { MoneyView() }
+                    }
                 }
             }
             PunchTabBar(selection: $router.tab) { router.draft.reset(store); router.adding = true }.padding(.bottom, 2)
         }
         .fullScreenCover(isPresented: $router.adding) { AddShiftView() }
-        .sheet(isPresented: $router.settings) { SettingsView().presentationBackground(Neon.bg2).presentationDetents([.large]) }
+        .sheet(isPresented: $router.settings) {
+            SettingsView().presentationBackground(Neon.bg2).presentationDetents([.large])
+                .sheet(item: $pro.paywall) { r in PaywallView(reason: r).presentationBackground(Neon.bg) }
+        }
+        .sheet(item: Binding(get: { router.settings ? nil : pro.paywall }, set: { pro.paywall = $0 })) { r in PaywallView(reason: r).presentationBackground(Neon.bg) }
     }
 }
 
