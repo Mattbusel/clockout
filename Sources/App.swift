@@ -111,7 +111,7 @@ final class Router {
     var shiftMonth: String? = nil
     var shot = ""
 
-    func applyShotArgs(_ s: Store, _ pro: Pro) {
+    @MainActor func applyShotArgs(_ s: Store, _ pro: Pro) {
         let a = ProcessInfo.processInfo.arguments
         guard let i = a.firstIndex(of: "-shot"), i + 1 < a.count else { return }
         shot = a[i + 1]
